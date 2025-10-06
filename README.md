@@ -39,6 +39,12 @@ source venv/bin/activate    # Mac/Linux
 ```bash
 pip install torch torchvision tqdm
 ```
+## Datasets
+
+This project uses the **CIFAR-10** dataset. 
+The dataset will be automatically downloaded and stored in the `data/` folder when you run the `main.py` script for the first time.
+Folder structure after downloading:
+
 
 ## Usage
 
