@@ -1,0 +1,11 @@
+[project]
+name = "cnn-genai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.1.0",
+    "torchvision>=0.18.0",
+    "tqdm"
+]
