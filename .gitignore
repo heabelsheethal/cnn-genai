@@ -8,3 +8,24 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+
+
+# Data and model files
+data/
+*.tar.gz
+*.zip
+*.pt
+*.pth
+*.h5
+*.ckpt
+
+# Jupyter / VSCode / IDE files
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+
+# Logs and temp files
+*.log
+*.tmp
