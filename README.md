@@ -48,9 +48,7 @@ cd cnn_genai
 
 ```bash
 python -m venv .venv            # Create venv
-
 source .venv/bin/activate       # Activate (Mac/Linux)
-
 .venv\Scripts\activate          # Activate (Windows)
 ```
 
@@ -72,9 +70,13 @@ python main.py --model CNN_Assignment2
 ```
 
 Available models:
+
 	•	FCNN — Fully Connected Neural Network
+
 	•	CNN — Simple 2-layer CNN
+
 	•	EnhancedCNN — Deeper CNN with batch normalization & dropout
+
 	•	CNN_Assignment2 — 64×64 CNN for extended architecture testing
 
 Each trained model is saved in:
@@ -99,7 +101,9 @@ Start the FastAPI server:
 uvicorn app.api:app --reload
 ```
 Once running, visit:
+
 	•	Root endpoint: http://127.0.0.1:8000/
+
 	•	Interactive docs: http://127.0.0.1:8000/docs
 
 
