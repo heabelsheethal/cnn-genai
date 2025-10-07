@@ -21,6 +21,7 @@ def train_model(model, data_loader, criterion, optimizer, device = 'cpu', epochs
             inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
+            print(outputs.shape, labels.shape ) # Debugging line to check shapes
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()

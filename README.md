@@ -6,15 +6,23 @@ A PyTorch project to train and evaluate different neural network models (FCNN, S
 ## Project Structure
 ```
 cnn_genai/
-├── helper_lib/
-│   ├── data_loader.py     # Data loading module
-│   ├── evaluator.py       # Evaluation module
-│   ├── model.py           # Model definitions
-│   └── trainer.py         # Training module
-├── main.py                # Entry point
-├── pyproject.toml         # Project metadata & dependencies
-├── README.md              # Project documentation
-└── .python-version        # Python version
+├── app/                  # API layer using FastAPI
+│   ├── __init__.py
+│   └── api.py
+├── helper_lib/           # Core library: models, data loaders, trainers, evaluation
+│   ├── __init__.py
+│   ├── data_loader.py
+│   ├── evaluator.py
+│   ├── model.py
+│   ├── fcnn.py
+│   ├── assignment2.py
+│   ├── simple_cnn.py
+│   ├── enhanced_cnn.py
+│   └── trainer.py
+├── main.py               # CLI entry point for training
+├── pyproject.toml        # Dependencies and metadata
+├── README.md
+└── .python-version
 ```
 
 

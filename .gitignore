@@ -1,31 +1,47 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+*$py.class
+*.py~
 build/
 dist/
 wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
 venv/
-
+ENV/
+env/
 
 # Data and model files
 data/
-*.tar.gz
-*.zip
+models/*.pth
 *.pt
-*.pth
 *.h5
 *.ckpt
-
-# Jupyter / VSCode / IDE files
-.ipynb_checkpoints/
-.vscode/
-.idea/
-.DS_Store
+*.tar.gz
+*.zip
 
 # Logs and temp files
 *.log
 *.tmp
+*.out
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# IDE / editor configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS / system files
+.DS_Store
+Thumbs.db
+
+# FastAPI docs / static files (optional)
+docs/
+
+ 

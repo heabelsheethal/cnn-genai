@@ -7,5 +7,12 @@ requires-python = ">=3.12"
 dependencies = [
     "torch>=2.1.0",
     "torchvision>=0.18.0",
-    "tqdm"
+    "tqdm",
+    "fastapi>=0.116.2",
+    "uvicorn[standard]>=0.23.0",
+    "matplotlib>=3.10.6",
+    "numpy>=2.3.3",
 ]
+
+[tool.fastapi]
+app = "app.api:app"
