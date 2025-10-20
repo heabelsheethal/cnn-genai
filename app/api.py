@@ -75,8 +75,11 @@ def predict_enhancedcnn():
 def predict_assignment2():
     return predict_model_random("CNN_Assignment2")
 
+
+
+
 # ----------------------------------------------------
-# HELPER FUNCTION
+# HELPER FUNCTION (for classification models)
 # ----------------------------------------------------
 def predict_model_random(model_name: str):
     if model_name not in models:
@@ -99,3 +102,73 @@ def predict_model_random(model_name: str):
         "predicted_class": int(predicted.item()),
         "true_class": int(label.item())
     }
+
+
+
+# ==============================================================
+# 🧠 GAN IMAGE GENERATION ENDPOINTS
+# ==============================================================
+
+# ----------------------------------------------------
+# WGAN (CelebA) - from helper_lib.gan
+# ----------------------------------------------------
+@app.get("/generate/gan/random")
+def generate_wgan_image():
+    from helper_lib.gan import Generator
+    import torchvision.utils as vutils
+    import os
+
+    z_dim = 100
+    gen = Generator(z_dim).to(device)
+    model_path = "models/gan_generator.pth"
+
+    if not os.path.exists(model_path):
+        raise HTTPException(status_code=404, detail="Trained WGAN generator not found")
+
+    # Load generator
+    gen.load_state_dict(torch.load(model_path, map_location=device))
+    gen.eval()
+
+    # Generate new fake image
+    noise = torch.randn(1, z_dim, 1, 1, device=device)
+    with torch.no_grad():
+        fake_img = gen(noise).cpu()
+
+    os.makedirs("generated_images", exist_ok=True)
+    save_path = "generated_images/sample_gan.png"
+    vutils.save_image(fake_img, save_path, normalize=True)
+
+    return {"message": "New CelebA GAN image generated!", "file_path": save_path}
+
+
+# ----------------------------------------------------
+# Assignment 3 GAN (MNIST) - from helper_lib.assignment3_gan
+# ----------------------------------------------------
+@app.get("/generate/gan_assignment3/random")
+def generate_assignment3_gan_image():
+    from helper_lib.assignment3_gan import Generator
+    import torchvision.utils as vutils
+    import os
+
+    z_dim = 100
+    gen = Generator(z_dim).to(device)
+    model_path = "models/gan3_generator.pth"
+
+    if not os.path.exists(model_path):
+        raise HTTPException(status_code=404, detail="Trained Assignment3 GAN generator not found")
+
+    # Load generator
+    gen.load_state_dict(torch.load(model_path, map_location=device))
+    gen.eval()
+
+    # Generate MNIST-like fake image
+    noise = torch.randn(1, z_dim, device=device)
+    with torch.no_grad():
+        fake_img = gen(noise).cpu()
+
+    os.makedirs("generated_images", exist_ok=True)
+    save_path = "generated_images/sample_assignment3_gan.png"
+    vutils.save_image(fake_img, save_path, normalize=True)
+
+    return {"message": "New MNIST GAN image generated!", "file_path": save_path}
+

@@ -19,7 +19,9 @@ cnn_genai/
 │   ├── fcnn.py               # Fully Connected Neural Network (FCNN)
 │   ├── simple_cnn.py         # Basic CNN architecture
 │   ├── enhanced_cnn.py       # CNN with BatchNorm and Dropout
-│   └── assignment2.py        # 64×64 CNN architecture for assignment
+│   ├── assignment2.py        # 64×64 CNN architecture for assignment
+│   ├── gan.py
+│   └── assignment3_gan.py
 ├── main.py                   # Command-line training script
 ├── pyproject.toml            # Dependencies and project metadata
 ├── .python-version           # Python version (>=3.12)

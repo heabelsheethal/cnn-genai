@@ -13,6 +13,7 @@ dependencies = [
     "matplotlib>=3.10.6",
     "numpy>=2.3.3",
     "spacy>=3.7.2", 
+    "gdown",                # for CelebA dataset download
 ]
 
 [tool.fastapi]
