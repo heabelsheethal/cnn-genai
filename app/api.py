@@ -1,6 +1,7 @@
+import os
 import random
-from fastapi import FastAPI, HTTPException
 import torch
+from fastapi import FastAPI, HTTPException
 from helper_lib.model import get_model
 from helper_lib.data_loader import get_data_loader
 
@@ -19,21 +20,22 @@ device = (
 )
 print(f"Using device: {device}")
 
-# ----------------------------------------------------
-# LOAD MODELS
-# ----------------------------------------------------
+# ====================================================
+# 1️⃣ LOAD CLASSIFICATION MODELS (CIFAR-10 based)
+# ====================================================
 model_names = ["FCNN", "CNN", "EnhancedCNN", "CNN_Assignment2"]
 models = {}
 
 for name in model_names:
     model = get_model(name).to(device)
+    model_path = f"models/{name}.pth"
     try:
-        model.load_state_dict(torch.load(f"models/{name}.pth", map_location=device))
+        model.load_state_dict(torch.load(model_path, map_location=device))
         model.eval()
         models[name] = model
         print(f"Loaded {name} model successfully")
     except FileNotFoundError:
-        print(f"Warning: {name}.pth not found. Using untrained model")
+        print(f"⚠️ Warning: {model_path} not found. Using untrained {name} model")
 
 # ----------------------------------------------------
 # LOAD TEST IMAGES (PER MODEL SIZE)
@@ -45,16 +47,55 @@ for name in model_names:
     elif name.lower() == "cnn_assignment2":
         loader = get_data_loader("data/test", batch_size=1, train=False, model_name="CNN_Assignment2")
     else:
-        # CNN and EnhancedCNN likely expect 32x32
         loader = get_data_loader("data/test", batch_size=1, train=False, model_name="CNN")
     test_images[name] = list(loader)
+
+print("Test images preloaded successfully.")
+
+# ====================================================
+# 2️⃣ PRELOAD GAN MODELS
+# ====================================================
+
+gan_models = {}
+
+# ---- WGAN (CelebA) ----
+try:
+    from helper_lib.gan import Generator as WGANGenerator
+    wgen = WGANGenerator(100).to(device)
+    wgen.load_state_dict(torch.load("models/gan_generator.pth", map_location=device))
+    wgen.eval()
+    gan_models["GAN"] = wgen
+    print("Loaded GAN (CelebA) generator successfully")
+except FileNotFoundError:
+    print("GAN generator not found (models/gan_generator.pth missing)")
+
+# ---- Assignment 3 GAN (MNIST) ----
+try:
+    from helper_lib.assignment3_gan import Generator as MNISTGenerator
+    gen3 = MNISTGenerator(100).to(device)
+    gen3.load_state_dict(torch.load("models/gan3_generator.pth", map_location=device))
+    gen3.eval()
+    gan_models["GAN_Assignment3"] = gen3
+    print("Loaded GAN_Assignment3 (MNIST) generator successfully")
+except FileNotFoundError:
+    print("⚠️ GAN_Assignment3 generator not found (models/gan3_generator.pth missing)")
 
 # ----------------------------------------------------
 # ROOT ENDPOINT
 # ----------------------------------------------------
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to CNN GenAI API!"}
+    return {
+        "message": "Welcome to CNN GenAI API!",
+        "available_routes": [
+            "/predict/fcnn/random",
+            "/predict/cnn/random",
+            "/predict/enhancedcnn/random",
+            "/predict/cnn_assignment2/random",
+            "/generate/gan/random",
+            "/generate/gan_assignment3/random",
+        ]
+    }
 
 # ----------------------------------------------------
 # MODEL PREDICTION ENDPOINTS
@@ -75,9 +116,6 @@ def predict_enhancedcnn():
 def predict_assignment2():
     return predict_model_random("CNN_Assignment2")
 
-
-
-
 # ----------------------------------------------------
 # HELPER FUNCTION (for classification models)
 # ----------------------------------------------------
@@ -85,17 +123,13 @@ def predict_model_random(model_name: str):
     if model_name not in models:
         raise HTTPException(status_code=404, detail=f"Model '{model_name}' not found")
 
-    # Each item from test_images is a batch of size 1
     image, label = random.choice(test_images[model_name])
-
-    # image shape is [1, C, H, W] 
-    # Just send to device 
     image = image.to(device)
     label = label.to(device)
 
     with torch.no_grad():
-        outputs = models[model_name](image)  # shape [1, num_classes]
-        _, predicted = torch.max(outputs, 1)  # shape [1]
+        outputs = models[model_name](image)
+        _, predicted = torch.max(outputs, 1)
 
     return {
         "model": model_name,
@@ -103,33 +137,20 @@ def predict_model_random(model_name: str):
         "true_class": int(label.item())
     }
 
-
-
 # ==============================================================
-# 🧠 GAN IMAGE GENERATION ENDPOINTS
+# GAN IMAGE GENERATION ENDPOINTS
 # ==============================================================
 
-# ----------------------------------------------------
-# WGAN (CelebA) - from helper_lib.gan
-# ----------------------------------------------------
+# ---- WGAN (CelebA) ----
 @app.get("/generate/gan/random")
 def generate_wgan_image():
-    from helper_lib.gan import Generator
     import torchvision.utils as vutils
-    import os
+    if "GAN" not in gan_models:
+        raise HTTPException(status_code=404, detail="GAN generator not preloaded")
 
+    gen = gan_models["GAN"]
     z_dim = 100
-    gen = Generator(z_dim).to(device)
-    model_path = "models/gan_generator.pth"
 
-    if not os.path.exists(model_path):
-        raise HTTPException(status_code=404, detail="Trained WGAN generator not found")
-
-    # Load generator
-    gen.load_state_dict(torch.load(model_path, map_location=device))
-    gen.eval()
-
-    # Generate new fake image
     noise = torch.randn(1, z_dim, 1, 1, device=device)
     with torch.no_grad():
         fake_img = gen(noise).cpu()
@@ -137,31 +158,20 @@ def generate_wgan_image():
     os.makedirs("generated_images", exist_ok=True)
     save_path = "generated_images/sample_gan.png"
     vutils.save_image(fake_img, save_path, normalize=True)
+    print(f"Saved new GAN image → {save_path}")
 
     return {"message": "New CelebA GAN image generated!", "file_path": save_path}
 
-
-# ----------------------------------------------------
-# Assignment 3 GAN (MNIST) - from helper_lib.assignment3_gan
-# ----------------------------------------------------
+# ---- Assignment 3 GAN (MNIST) ----
 @app.get("/generate/gan_assignment3/random")
 def generate_assignment3_gan_image():
-    from helper_lib.assignment3_gan import Generator
     import torchvision.utils as vutils
-    import os
+    if "GAN_Assignment3" not in gan_models:
+        raise HTTPException(status_code=404, detail="Assignment3 GAN generator not preloaded")
 
+    gen = gan_models["GAN_Assignment3"]
     z_dim = 100
-    gen = Generator(z_dim).to(device)
-    model_path = "models/gan3_generator.pth"
 
-    if not os.path.exists(model_path):
-        raise HTTPException(status_code=404, detail="Trained Assignment3 GAN generator not found")
-
-    # Load generator
-    gen.load_state_dict(torch.load(model_path, map_location=device))
-    gen.eval()
-
-    # Generate MNIST-like fake image
     noise = torch.randn(1, z_dim, device=device)
     with torch.no_grad():
         fake_img = gen(noise).cpu()
@@ -169,5 +179,6 @@ def generate_assignment3_gan_image():
     os.makedirs("generated_images", exist_ok=True)
     save_path = "generated_images/sample_assignment3_gan.png"
     vutils.save_image(fake_img, save_path, normalize=True)
+    print(f"Saved new Assignment3 GAN image → {save_path}")
 
     return {"message": "New MNIST GAN image generated!", "file_path": save_path}
