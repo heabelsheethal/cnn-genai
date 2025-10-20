@@ -1,7 +1,11 @@
 ## CNN GenAI
 
-A modular PyTorch + FastAPI project for building, training, evaluating, and serving Convolutional Neural Networks (CNNs).
-This project demonstrates the use of multiple neural network architectures (FCNN, CNN, EnhancedCNN, and Assignment2 CNN) on the CIFAR-10 dataset.
+A modular PyTorch + FastAPI project for building, training, evaluating, and serving Convolutional Neural Networks (CNNs) and Generative Adversarial Networks (GANs).
+
+This repo supports multiple model architectures:
+	•	FCNN, CNN, EnhancedCNN, CNN_Assignment2 → trained on CIFAR-10
+	•	GAN (WGAN-CelebA) → generates 64×64 color faces
+	•	GAN_Assignment3 (Standard GAN-MNIST) → generates 28×28 grayscale digits
 
 
 ## Project Structure
@@ -20,8 +24,8 @@ cnn_genai/
 │   ├── simple_cnn.py         # Basic CNN architecture
 │   ├── enhanced_cnn.py       # CNN with BatchNorm and Dropout
 │   ├── assignment2.py        # 64×64 CNN architecture for assignment
-│   ├── gan.py
-│   └── assignment3_gan.py
+│   ├── gan.py                # WGAN for CelebA dataset
+│   └── assignment3_gan.py    # GAN for MNIST dataset (Assignment 3)
 ├── main.py                   # Command-line training script
 ├── pyproject.toml            # Dependencies and project metadata
 ├── .python-version           # Python version (>=3.12)
@@ -68,6 +72,8 @@ python main.py --model CNN
 python main.py --model FCNN
 python main.py --model EnhancedCNN
 python main.py --model CNN_Assignment2
+python main.py --model GAN
+python main.py --model GAN_Assignment3
 
 ```
 
@@ -80,6 +86,11 @@ Available models:
 	•	EnhancedCNN — Deeper CNN with batch normalization & dropout
 
 	•	CNN_Assignment2 — 64×64 CNN for extended architecture testing
+
+	•	GAN -  Wasserstein GAN (CelebA, 64×64 RGB faces)
+
+	•	GAN_Assignment3 - Standard GAN (MNIST, 28×28 digits)
+
 
 Each trained model is saved in:
 ```bash

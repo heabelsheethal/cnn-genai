@@ -78,7 +78,7 @@ try:
     gan_models["GAN_Assignment3"] = gen3
     print("Loaded GAN_Assignment3 (MNIST) generator successfully")
 except FileNotFoundError:
-    print("⚠️ GAN_Assignment3 generator not found (models/gan3_generator.pth missing)")
+    print("GAN_Assignment3 generator not found (models/gan3_generator.pth missing)")
 
 # ----------------------------------------------------
 # ROOT ENDPOINT
