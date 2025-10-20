@@ -171,4 +171,3 @@ def generate_assignment3_gan_image():
     vutils.save_image(fake_img, save_path, normalize=True)
 
     return {"message": "New MNIST GAN image generated!", "file_path": save_path}
-
