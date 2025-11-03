@@ -13,31 +13,37 @@ This repo supports multiple model architectures:
 cnn_genai/
 ├── app/
 │   ├── __init__.py
-│   └── api.py                # FastAPI app with prediction endpoints
+│   └── api.py                    # FastAPI app with prediction + generation endpoints
 ├── helper_lib/
 │   ├── __init__.py
-│   ├── data_loader.py        # Data loading utilities (CIFAR-10)
-│   ├── evaluator.py          # Model evaluation functions
-│   ├── trainer.py            # Training loop implementation
-│   ├── model.py              # Model selector / factory
-│   ├── fcnn.py               # Fully Connected Neural Network (FCNN)
-│   ├── simple_cnn.py         # Basic CNN architecture
-│   ├── enhanced_cnn.py       # CNN with BatchNorm and Dropout
-│   ├── assignment2.py        # 64×64 CNN architecture for assignment
-│   ├── gan.py                # WGAN for CelebA dataset
-│   └── assignment3_gan.py    # GAN for MNIST dataset (Assignment 3)
-├── main.py                   # Command-line training script
-├── pyproject.toml            # Dependencies and project metadata
-├── .python-version           # Python version (>=3.12)
-├── .gitignore                # Ignored files and directories
-└── README.md                 # Project documentation
+│   ├── data_loader.py            # Handles CIFAR-10, MNIST, CelebA
+│   ├── evaluator.py              # Evaluation utilities
+│   ├── trainer.py                # Training loops (CNN, GAN, Diffusion, Energy)
+│   ├── model.py                  # Model selector / factory
+│   ├── fcnn.py                   # Fully Connected Network
+│   ├── simple_cnn.py             # Basic CNN
+│   ├── enhanced_cnn.py           # CNN + BatchNorm + Dropout
+│   ├── assignment2.py            # 64×64 CNN architecture (Assignment 2)
+│   ├── gan.py                    # WGAN (CelebA)
+│   ├── assignment3_gan.py        # Standard GAN (MNIST)
+│   ├── diffusion_model.py        # UNet Diffusion model with offset cosine schedule
+│   ├── energy_model.py           # Energy-based model (EBM)
+│   └── generator.py              # Generation utilities (Diffusion & Energy)
+├── main.py                       # Command-line training driver
+├── pyproject.toml                # Dependencies / metadata
+├── uv.lock                       # Locked environment
+├── .gitignore
+└── README.md
 ```
 
 
 ## Datasets
 
-This project uses the **CIFAR-10** dataset. 
-The dataset will be automatically downloaded and stored in the `data/` folder when you run the `main.py` script for the first time.
+•	CIFAR-10 (32×32 RGB) → classification, diffusion, energy
+•	CelebA (64×64 faces) → WGAN
+•	MNIST (28×28 digits) → Assignment 3 GAN
+
+All datasets download automatically into data/ when you run main.py.
 
 
 ## Installation
@@ -45,23 +51,24 @@ The dataset will be automatically downloaded and stored in the `data/` folder wh
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/heabelsheethal/cnn-genai.git
 cd cnn_genai
+
 ```
 
 
 2.	Create and Activate a Virtual Environment:
 
 ```bash
-python -m venv .venv            # Create venv
-source .venv/bin/activate       # Activate (Mac/Linux)
+python -m venv .venv
+source .venv/bin/activate        # (Mac/Linux)
 .venv\Scripts\activate          # Activate (Windows)
 ```
 
 3.	Install dependencies:
 
 ```bash
-uv sync
+uv sync                          # install dependencies
 ```
 
 ## Train a Model
@@ -74,6 +81,8 @@ python main.py --model EnhancedCNN
 python main.py --model CNN_Assignment2
 python main.py --model GAN
 python main.py --model GAN_Assignment3
+python main.py --model Diffusion
+python main.py --model Energy
 
 ```
 
@@ -90,6 +99,11 @@ Available models:
 	•	GAN -  Wasserstein GAN (CelebA, 64×64 RGB faces)
 
 	•	GAN_Assignment3 - Standard GAN (MNIST, 28×28 digits)
+
+	•	Diffusion - UNet Diffusion model with offset-cosine schedule + EMA (CIFAR-10)
+	•	Energy - Convolutional Energy-Based Model (EBM) with Langevin sampling (CIFAR-10)
+
+
 
 
 Each trained model is saved in:
@@ -121,6 +135,8 @@ Once running, visit:
 
 
 
+## Author
+Sheethal Heabel
 
 
 
