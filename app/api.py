@@ -1,9 +1,13 @@
+# app/api.py
+
 import os
 import random
 import torch
 from fastapi import FastAPI, HTTPException
 from helper_lib.model import get_model
 from helper_lib.data_loader import get_data_loader
+from helper_lib.generator import generate_samples_diffusion, generate_samples_energy
+from torchvision.utils import save_image
 
 # ----------------------------------------------------
 # FASTAPI APP
@@ -80,6 +84,40 @@ try:
 except FileNotFoundError:
     print("GAN_Assignment3 generator not found (models/gan3_generator.pth missing)")
 
+# ====================================================
+# 3️⃣ PRELOAD DIFFUSION & ENERGY MODELS
+# ====================================================
+diffusion_model = None
+energy_model = None
+
+# ---- Diffusion (CIFAR-10 32×32 RGB) ----
+try:
+    diffusion_model = get_model("Diffusion").to(device)
+    diffusion_model.load_state_dict(torch.load("models/diffusion_model.pth", map_location=device))
+    diffusion_model.eval()
+    print("Loaded Diffusion model successfully")
+except FileNotFoundError:
+    print("Diffusion model weights not found (models/diffusion_model.pth missing) — API will use untrained weights.")
+    try:
+        diffusion_model = get_model("Diffusion").to(device)
+        diffusion_model.eval()
+    except Exception as e:
+        print(f"Failed to init Diffusion model: {e}")
+
+# ---- Energy-based model (CIFAR-10 32×32 RGB) ----
+try:
+    energy_model = get_model("Energy").to(device)
+    energy_model.load_state_dict(torch.load("models/energy_model.pth", map_location=device))
+    energy_model.eval()
+    print("Loaded Energy model successfully")
+except FileNotFoundError:
+    print("Energy model weights not found (models/energy_model.pth missing) — API will use untrained weights.")
+    try:
+        energy_model = get_model("Energy").to(device)
+        energy_model.eval()
+    except Exception as e:
+        print(f"Failed to init Energy model: {e}")
+
 # ----------------------------------------------------
 # ROOT ENDPOINT
 # ----------------------------------------------------
@@ -94,6 +132,8 @@ def read_root():
             "/predict/cnn_assignment2/random",
             "/generate/gan/random",
             "/generate/gan_assignment3/random",
+            "/generate/diffusion/random",
+            "/generate/energy/random",
         ]
     }
 
@@ -182,3 +222,37 @@ def generate_assignment3_gan_image():
     print(f"Saved new Assignment3 GAN image → {save_path}")
 
     return {"message": "New MNIST GAN image generated!", "file_path": save_path}
+
+# ---- Diffusion (CIFAR-10) ----
+@app.get("/generate/diffusion/random")
+def generate_diffusion_image():
+    if diffusion_model is None:
+        raise HTTPException(status_code=404, detail="Diffusion model not preloaded")
+    os.makedirs("generated_images", exist_ok=True)
+    try:
+        imgs = generate_samples_diffusion(
+            diffusion_model, device=str(device), num_samples=4, steps=20, image_size=32
+        )
+        save_path = "generated_images/sample_diffusion.png"
+        save_image(imgs, save_path, nrow=4, normalize=True)
+        print(f"Saved new Diffusion image grid → {save_path}")
+        return {"message": "New Diffusion images generated!", "file_path": save_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Diffusion generation failed: {e}")
+
+# ---- Energy-based model (CIFAR-10) ----
+@app.get("/generate/energy/random")
+def generate_energy_image():
+    if energy_model is None:
+        raise HTTPException(status_code=404, detail="Energy model not preloaded")
+    os.makedirs("generated_images", exist_ok=True)
+    try:
+        imgs = generate_samples_energy(
+            energy_model, device=str(device), num_samples=4, steps=50
+        )
+        save_path = "generated_images/sample_energy.png"
+        save_image(imgs, save_path, nrow=4, normalize=True)
+        print(f"Saved new Energy image grid → {save_path}")
+        return {"message": "New Energy images generated!", "file_path": save_path}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Energy generation failed: {e}")

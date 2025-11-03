@@ -1,3 +1,5 @@
+# helper_lib/gan.py
+ 
 import torch
 import os
 import torch.nn as nn
@@ -182,3 +184,7 @@ class GANModel:
 
     def get_models(self):
         return self.gen, self.critic
+    
+
+
+    

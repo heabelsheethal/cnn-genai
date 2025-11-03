@@ -1,3 +1,5 @@
+# main.py
+
 import argparse
 import os
 import torch
@@ -9,10 +11,12 @@ from helper_lib.trainer import train_model
 from helper_lib.evaluator import evaluate_model
 from helper_lib.gan import train_gan_model as train_gan_model_v1
 from helper_lib.assignment3_gan import train_gan_model as train_gan_model_v2
+from helper_lib.generator import generate_samples_diffusion, generate_samples_energy 
 
 
 # Centralize the available model names
-MODEL_CHOICES = ["FCNN", "CNN", "EnhancedCNN", "CNN_Assignment2", "GAN", "GAN_Assignment3"]
+MODEL_CHOICES = ["FCNN","CNN","EnhancedCNN","CNN_Assignment2","GAN","GAN_Assignment3","Diffusion","Energy"]
+
 
 def main():
     # -------------------------Command line argument-------------------------
@@ -107,6 +111,64 @@ def main():
         print("Saved GAN3 Critic → models/gan3_critic.pth")
         print("Skipping evaluation (GAN has no accuracy metric).")
 
+    
+    elif args.model == "Energy":
+        # ---------------- Energy-Based Model ----------------
+        from helper_lib.trainer import train_energy  # local import to avoid circular deps
+        model = get_model(args.model).to(device) 
+        optimizer = optim.Adam(model.parameters(), lr=1e-6)
+        trained_model = train_energy(model, train_loader, optimizer, device=device, epochs=5)
+        
+        
+        # ---- Save model ----
+        os.makedirs("models", exist_ok=True)
+        torch.save(trained_model.state_dict(), "models/energy_model.pth")
+        print("Saved trained Energy model → models/energy_model.pth")
+        print("Skipping evaluation (Energy model is not a classifier).")
+
+        # ---- Generate sample images ----
+        print("Generating sample images using trained Energy model...")
+        save_dir = os.path.join("img", "generated_image_energy")
+        os.makedirs(save_dir, exist_ok=True)
+
+        imgs = generate_samples_energy(
+            trained_model, device=device, num_samples=4, steps=50
+        )
+
+        save_path = os.path.join(save_dir, "energy_samples.png")
+        from torchvision.utils import save_image
+        save_image(imgs, save_path, nrow=4, normalize=True)
+        print(f"Energy sample image saved → {save_path}")
+
+
+    elif args.model == "Diffusion":
+        # ---------------- Diffusion Model ----------------
+        from helper_lib.trainer import train_diffusion
+        model = get_model(args.model).to(device) 
+        optimizer = optim.Adam(model.parameters(), lr=1e-4)
+        trained_model = train_diffusion(model, train_loader, optimizer, device=device, epochs=1)
+        
+        # ---- Save model ----
+        os.makedirs("models", exist_ok=True)
+        torch.save(trained_model.state_dict(), "models/diffusion_model.pth")
+        print("Saved trained Diffusion model → models/diffusion_model.pth")
+        print("Skipping evaluation (Diffusion model generates images, not accuracy).")
+
+
+        # ---- Generate sample images ----
+        print("Generating sample images using trained Diffusion model...")
+        save_dir = os.path.join("img", "generated_image_diffusion")
+        os.makedirs(save_dir, exist_ok=True)
+
+        imgs = generate_samples_diffusion(
+            trained_model, device=device, num_samples=4, steps=20
+        )
+
+        save_path = os.path.join(save_dir, "diffusion_samples.png")
+        from torchvision.utils import save_image
+        save_image(imgs, save_path, nrow=4, normalize=True)
+        print(f"Diffusion sample image saved → {save_path}")
+        
     else: 
         # ---------------- CNN based Models ----------------
         model = get_model(args.model)
@@ -115,7 +177,7 @@ def main():
         # ------------------------- Train model-------------------------
         trained_model = train_model(model, train_loader, criterion, optimizer, device=device, epochs=1)
 
-        # ------------------------- Save trained model -------------------------
+        # ---- Save model ----
         os.makedirs("models", exist_ok=True)  # ensure folder exists
         model_path = f"models/{args.model}.pth"
         torch.save(trained_model.state_dict(), model_path)
@@ -129,3 +191,10 @@ if __name__ == "__main__":
     main()
 
 
+
+
+
+
+
+    
+    

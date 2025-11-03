@@ -1,3 +1,5 @@
+# helper_lib/data_loader.py
+
 import torch
 import os
 from PIL import Image 
@@ -19,8 +21,9 @@ def get_data_loader(data_dir, batch_size=32, train=True, model_name="CNN_Assignm
         target_size = 64
 
   
-
+    # ===============================================================
     # Case 1: ----------GAN model (from Notes) -> Use CelebA dataset with 64×64 crops-------
+    # ===============================================================
     if model_name == "GAN":
         # Define transforms
         transform = transforms.Compose([
@@ -39,8 +42,9 @@ def get_data_loader(data_dir, batch_size=32, train=True, model_name="CNN_Assignm
         dataset = datasets.CelebA(root=data_dir, split=split, download=True, transform=transform)
     
 
-
+    # ===============================================================
     # Case 2: --------------Assignment 3 GAN model -> Use MNIST dataset (28×28 grayscale)------------
+    # ===============================================================
     elif model_name == "GAN_Assignment3":
         # Define transforms
         transform = transforms.Compose([
@@ -54,8 +58,9 @@ def get_data_loader(data_dir, batch_size=32, train=True, model_name="CNN_Assignm
         dataset = datasets.MNIST(root=data_dir, train=train, download=True, transform=transform)
 
 
-    
+    # ===============================================================
     # Case 3: ----------CNN / FCNN / EnhancedCNN / CNN_Assignment2 models -> Use CIFAR-10 dataset--------
+    # ===============================================================
     elif model_name in ["FCNN", "CNN", "EnhancedCNN", "CNN_Assignment2"]:                                                        
         # Define transforms
         transform = transforms.Compose([
@@ -68,7 +73,33 @@ def get_data_loader(data_dir, batch_size=32, train=True, model_name="CNN_Assignm
 
 
     # ===============================================================
-    # Case 4: Custom dataset (defined seperately)
+    # Case 4: ---------- Diffusion ----------
+    # ===============================================================
+    elif model_name == "Diffusion":
+        transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        dataset = datasets.CIFAR10(root=data_dir, train=train, download=True, transform=transform)
+    
+
+    # ===============================================================
+    # Case 5: ---------- Energy ----------
+    # ===============================================================
+    elif model_name == "Energy":
+        transform = transforms.Compose([
+            transforms.Resize((32, 32)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        dataset = datasets.CIFAR10(root=data_dir, train=train, download=True, transform=transform)
+
+
+
+
+    # ===============================================================
+    # Case 6: Custom dataset (defined seperately)
     # ===============================================================
     else:
         print("NO Model defined, using CustomImageDataset class - DEVELOPMENT UNDER PROGRESS ")
@@ -76,7 +107,7 @@ def get_data_loader(data_dir, batch_size=32, train=True, model_name="CNN_Assignm
             transforms.Resize((target_size, target_size)),
             transforms.ToTensor()
         ])
-        dataset = CustomImageDataset(root=data_dir, transform=transform) 
+        dataset = CustomImageDataset(root_dir=data_dir, transform=transform)
 
 
 

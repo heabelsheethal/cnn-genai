@@ -1,3 +1,5 @@
+# helper_lib/enhanced_cnn.py
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,3 +30,8 @@ class EnhancedCNN(nn.Module):
         x = self.dropout(x)
         x = self.fc2(x)
         return x
+    
+
+
+
+    

@@ -12,6 +12,7 @@ dependencies = [
     "uvicorn[standard]>=0.23.0",
     "matplotlib>=3.10.6",
     "numpy>=2.3.3",
+    "pandas>=2.0.0", 
     "spacy>=3.7.2", 
     "gdown",                # for CelebA dataset download
 ]
