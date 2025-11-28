@@ -14,8 +14,9 @@ from helper_lib.assignment3_gan import train_gan_model as train_gan_model_v2
 from helper_lib.generator import generate_samples_diffusion, generate_samples_energy 
 
 
+
 # Centralize the available model names
-MODEL_CHOICES = ["FCNN","CNN","EnhancedCNN","CNN_Assignment2","GAN","GAN_Assignment3","Diffusion","Energy"]
+MODEL_CHOICES = ["FCNN","CNN","EnhancedCNN","CNN_Assignment2","GAN","GAN_Assignment3","Diffusion","Energy", "LLM"]
 
 
 def main():
@@ -57,8 +58,12 @@ def main():
     print(f"Using device: {device}")
 
     # -------------------------Load data-------------------------
-    train_loader = get_data_loader('data/train', model_name=args.model)
-    test_loader = get_data_loader('data/test', train=False, model_name=args.model)
+    # ------------------------------------------------------
+    # LOAD DATA ONLY FOR IMAGE-BASED MODELS (NOT FOR LLM)
+    # ------------------------------------------------------
+    if args.model != "LLM":
+        train_loader = get_data_loader('data/train', model_name=args.model)
+        test_loader = get_data_loader('data/test', train=False, model_name=args.model)
 
 
 
@@ -168,6 +173,19 @@ def main():
         from torchvision.utils import save_image
         save_image(imgs, save_path, nrow=4, normalize=True)
         print(f"Diffusion sample image saved → {save_path}")
+
+
+    elif args.model == "LLM":
+        # ---------------- LLM Fine-Tuning (Assignment 5) ----------------
+        from helper_lib.assignment5_llm.llm_finetune_gpt2 import train as train_llm
+
+        print("Starting GPT-2 fine-tuning for Assignment 5...")
+        train_llm()
+
+        print("Fine-tuning completed!")
+        print("Model saved in folder: ./finetuned_gpt2/")
+        print("Skipping evaluation because LLMs are not classifiers.")
+        
         
     else: 
         # ---------------- CNN based Models ----------------
