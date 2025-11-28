@@ -23,6 +23,13 @@ models/*.pth
 *.tar.gz
 *.zip
 
+# IGNORE ALL FINE-TUNED LLM WEIGHTS
+finetuned_gpt2/
+models/assignment5_llm_posttrained/
+*.safetensors
+*.bin
+*.json
+
 # Logs and temp files
 *.log
 *.tmp

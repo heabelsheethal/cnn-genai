@@ -140,19 +140,19 @@ def read_root():
 # ----------------------------------------------------
 # MODEL PREDICTION ENDPOINTS
 # ----------------------------------------------------
-@app.get("/predict/fcnn/random")
+@app.get("/predict/fcnn/random", tags=["CNN"])
 def predict_fcnn():
     return predict_model_random("FCNN")
 
-@app.get("/predict/cnn/random")
+@app.get("/predict/cnn/random", tags=["CNN"])
 def predict_cnn():
     return predict_model_random("CNN")
 
-@app.get("/predict/enhancedcnn/random")
+@app.get("/predict/enhancedcnn/random", tags=["CNN"])
 def predict_enhancedcnn():
     return predict_model_random("EnhancedCNN")
 
-@app.get("/predict/cnn_assignment2/random")
+@app.get("/predict/cnn_assignment2/random", tags=["CNN"])
 def predict_assignment2():
     return predict_model_random("CNN_Assignment2")
 
@@ -182,7 +182,7 @@ def predict_model_random(model_name: str):
 # ==============================================================
 
 # ---- WGAN (CelebA) ----
-@app.get("/generate/gan/random")
+@app.get("/generate/gan/random", tags=["GAN"])
 def generate_wgan_image():
     import torchvision.utils as vutils
     if "GAN" not in gan_models:
@@ -203,7 +203,7 @@ def generate_wgan_image():
     return {"message": "New CelebA GAN image generated!", "file_path": save_path}
 
 # ---- Assignment 3 GAN (MNIST) ----
-@app.get("/generate/gan_assignment3/random")
+@app.get("/generate/gan_assignment3/random", tags=["GAN"])
 def generate_assignment3_gan_image():
     import torchvision.utils as vutils
     if "GAN_Assignment3" not in gan_models:
@@ -224,7 +224,7 @@ def generate_assignment3_gan_image():
     return {"message": "New MNIST GAN image generated!", "file_path": save_path}
 
 # ---- Diffusion (CIFAR-10) ----
-@app.get("/generate/diffusion/random")
+@app.get("/generate/diffusion/random", tags=["Diffusion & Energy"])
 def generate_diffusion_image():
     if diffusion_model is None:
         raise HTTPException(status_code=404, detail="Diffusion model not preloaded")
@@ -241,7 +241,7 @@ def generate_diffusion_image():
         raise HTTPException(status_code=500, detail=f"Diffusion generation failed: {e}")
 
 # ---- Energy-based model (CIFAR-10) ----
-@app.get("/generate/energy/random")
+@app.get("/generate/energy/random", tags=["Diffusion & Energy"])
 def generate_energy_image():
     if energy_model is None:
         raise HTTPException(status_code=404, detail="Energy model not preloaded")
@@ -256,3 +256,10 @@ def generate_energy_image():
         return {"message": "New Energy images generated!", "file_path": save_path}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Energy generation failed: {e}")
+    
+
+# ---------------------------------------------
+# LLM ROUTES
+# ---------------------------------------------
+from app.api_llm import router as llm_router
+app.include_router(llm_router)

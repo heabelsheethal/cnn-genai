@@ -15,6 +15,8 @@ dependencies = [
     "pandas>=2.0.0", 
     "spacy>=3.7.2", 
     "gdown",                # for CelebA dataset download
+    "transformers>=4.45.0",
+    "datasets>=2.20.0",
 ]
 
 [tool.fastapi]
